@@ -35,7 +35,6 @@ const AirdropButton = (props: any) => {
       return;
     }
     const recipients = getRecipientArray();
-    console.log("recipients", recipients);
     setLoading(true);
     try {
       const sdk = new DecentSDK(chain.id, signer);
