@@ -20,7 +20,6 @@ const Home: NextPage = () => {
   const [contractName, setContractName] = useState("");
 
   const handleContractChange = async (e: any) => {
-    console.log(e.target.value);
     if (!ethers.utils.isAddress(e.target.value) || !chain || !signer) {
       return false;
     }
