@@ -8,9 +8,28 @@ import Link from "next/link";
 import AirdropButton from "../components/AirdropButton";
 import { useState } from "react";
 import AirdropUpload from "../components/AirdropUpload";
+import { ethers } from "ethers";
+import { DecentSDK, edition } from "@decent.xyz/sdk";
+import { useNetwork, useSigner } from "wagmi";
 
 const Home: NextPage = () => {
+  const { data: signer } = useSigner();
+  const { chain } = useNetwork();
   const [recipientString, setRecipientString] = useState("");
+  const [contractAddress, setContractAddress] = useState("");
+  const [contractName, setContractName] = useState("");
+
+  const handleContractChange = async (e: any) => {
+    if (!ethers.utils.isAddress(e.target.value) || !chain || !signer) {
+      return false;
+    }
+    setContractAddress(e.target.value);
+
+    const sdk = new DecentSDK(chain.id, signer);
+    const contract = await edition.getContract(sdk, e.target.value);
+    const name = await contract.name();
+    setContractName(name);
+  };
 
   return (
     <div className={`${styles.container} background`}>
@@ -27,7 +46,7 @@ const Home: NextPage = () => {
         <div className="flex items-center gap-4">
           <ConnectButton />
           <Link
-            href="https://github.com/decentxyz/Start-Decent"
+            href="https://github.com/decentxyz/airdrop-starter"
             target="_blank"
           >
             <Image
@@ -42,22 +61,39 @@ const Home: NextPage = () => {
         <h1 className={`${styles.title} font-medium`}>Airdrop Starter Pack</h1>
 
         <div className={`${styles.grid} cursor-pointer`}>
-          <div className="flex gap-4">
-            <p className="pb-2 font-medium">Airdrop Mint</p>
-            <div>
-              Enter addresses to which you would like to airdrop tokens. Please
-              use full addreses (not ENS names) and separate each with a comma.
-            </div>
-          </div>
-          <textarea
-            className="w-full text-black"
-            placeholder="0xd8da6bf26964af9d7eed9e03e53415d37aa96045,0xe9d18dbfd105155eb367fcfef87eaaafd15ea4b2,etc."
-            onChange={(e) => setRecipientString(e.target.value)}
-            value={recipientString}
-          ></textarea>
-          <AirdropUpload setAirdrop={setRecipientString} />
+          <p className="pb-2 font-medium">Collection Address</p>
 
-          <AirdropButton recipientString={recipientString} />
+          <input
+            className={`w-full input-text text-black`}
+            placeholder="0x..."
+            onChange={handleContractChange}
+            disabled={Boolean(contractAddress)}
+          />
+
+          {contractAddress && (
+            <div>
+              <div className="flex gap-4">
+                <p className="pb-2 font-medium">Name: {contractName}</p>
+                <div>
+                  Enter addresses to which you would like to airdrop tokens.
+                  Please use full addreses (not ENS names) and separate each
+                  with a comma.
+                </div>
+              </div>
+              <textarea
+                className="w-full text-black"
+                placeholder="0xd8da6bf26964af9d7eed9e03e53415d37aa96045,0xe9d18dbfd105155eb367fcfef87eaaafd15ea4b2,etc."
+                onChange={(e) => setRecipientString(e.target.value)}
+                value={recipientString}
+              ></textarea>
+              <AirdropUpload setAirdrop={setRecipientString} />
+
+              <AirdropButton
+                contractAddress={contractAddress}
+                recipientString={recipientString}
+              />
+            </div>
+          )}
         </div>
       </main>
 

@@ -1,15 +1,14 @@
 import { DecentSDK, edition } from "@decent.xyz/sdk";
-import { useAccount, useNetwork, useSigner } from "wagmi";
+import { useNetwork, useSigner } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import styles from "../../styles/Home.module.css";
 import { useState } from "react";
 import { ethers } from "ethers";
 
 const AirdropButton = (props: any) => {
-  const { recipientString } = props;
+  const { recipientString, contractAddress } = props;
   const { data: signer } = useSigner();
   const { chain } = useNetwork();
-  const { address } = useAccount();
   const { openConnectModal } = useConnectModal();
   const [loading, setLoading] = useState(false);
 
@@ -38,10 +37,7 @@ const AirdropButton = (props: any) => {
     setLoading(true);
     try {
       const sdk = new DecentSDK(chain.id, signer);
-      const contract = await edition.getContract(
-        sdk,
-        "0xfadC02970b24C86cC9931989EA0dc01B36e6B0a3"
-      );
+      const contract = await edition.getContract(sdk, contractAddress);
       const tx = await contract.mintAirdrop(recipients);
       await tx.wait();
     } catch (err) {
