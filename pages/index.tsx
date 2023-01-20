@@ -1,32 +1,16 @@
-import { ConnectButton, useConnectModal } from "@rainbow-me/rainbowkit";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import Image from "next/image";
 import Link from "next/link";
-import { DecentSDK, edition } from "@decent.xyz/sdk";
-import { useAccount, useNetwork, useSigner } from "wagmi";
+
+import AirdropButton from "../components/AirdropButton";
+import { useState } from "react";
+import AirdropUpload from "../components/AirdropUpload";
 
 const Home: NextPage = () => {
-  const { data: signer } = useSigner();
-  const { chain } = useNetwork();
-  const { address } = useAccount();
-  const { openConnectModal } = useConnectModal();
-
-  const onClick = async () => {
-    if (!chain || !signer) {
-      openConnectModal?.();
-      return;
-    }
-    const sdk = new DecentSDK(chain.id, signer);
-    console.log("sdk", sdk);
-    const contract = await edition.getContract(
-      sdk,
-      "0xfadC02970b24C86cC9931989EA0dc01B36e6B0a3"
-    );
-    const tx = await contract.mintAirdrop([address]);
-    console.log("tx", tx);
-  };
+  const [recipientString, setRecipientString] = useState("");
 
   return (
     <div className={`${styles.container} background`}>
@@ -58,9 +42,22 @@ const Home: NextPage = () => {
         <h1 className={`${styles.title} font-medium`}>Airdrop Starter Pack</h1>
 
         <div className={`${styles.grid} cursor-pointer`}>
-          <div onClick={onClick} className={styles.card}>
-            <h2 className="font-medium">Airdrop &rarr;</h2>
+          <div className="flex gap-4">
+            <p className="pb-2 font-medium">Airdrop Mint</p>
+            <div>
+              Enter addresses to which you would like to airdrop tokens. Please
+              use full addreses (not ENS names) and separate each with a comma.
+            </div>
           </div>
+          <textarea
+            className="w-full text-black"
+            placeholder="0xd8da6bf26964af9d7eed9e03e53415d37aa96045,0xe9d18dbfd105155eb367fcfef87eaaafd15ea4b2,etc."
+            onChange={(e) => setRecipientString(e.target.value)}
+            value={recipientString}
+          ></textarea>
+          <AirdropUpload setAirdrop={setRecipientString} />
+
+          <AirdropButton recipientString={recipientString} />
         </div>
       </main>
 
