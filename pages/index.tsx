@@ -47,7 +47,7 @@ const Home: NextPage = () => {
         <div className="flex items-center gap-4">
           <ConnectButton />
           <Link
-            href="https://github.com/decentxyz/Start-Decent"
+            href="https://github.com/decentxyz/airdrop-starter"
             target="_blank"
           >
             <Image
